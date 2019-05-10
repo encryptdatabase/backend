@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import dao.UserinfoDao;
 
 import jni.client;
-
-@RestController
 @CrossOrigin(origins = {"http://localhost:8000", "null"})
+@RestController
+
 public class Hello {
 	private UserinfoDao user= new UserinfoDao();
 
@@ -48,6 +48,20 @@ public class Hello {
 		System.out.println("****");
 		UserinfoDao dao = new UserinfoDao();  
 	    List<ArrayList> listdata = dao.orderby(type, dire);
+
+    	return listdata;
+    	// return (client.EncryptineConnect(host, user, pwd, dbname, master_key));
+//		System.out.println(client.RewriteQuery("select * from user").get("0"));
+	}
+	@RequestMapping("/select")
+	@ResponseBody
+	public List<ArrayList> select (@RequestParam String label1,@RequestParam String label2,@RequestParam String value) {
+		System.out.println("****");
+		System.out.println(label1);
+		System.out.println(value);
+		//System.out.println(label[1]);
+		UserinfoDao dao = new UserinfoDao();  
+	    List<ArrayList> listdata =dao.select(label1, label2, value);
 
     	return listdata;
     	// return (client.EncryptineConnect(host, user, pwd, dbname, master_key));

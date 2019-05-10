@@ -314,6 +314,77 @@ public List<ArrayList> orderby(int type ,int dire){
         }  
     }  
       
-      
+public List<ArrayList> select(String label1 ,String label2,String value ){
+	
+	System.out.println("\n\n\nin UserinfoDao.orderby\n\n\n");
+    Connection con = null;  
+    PreparedStatement psta = null;  
+    ResultSet rs = null;
+    List<ArrayList> datalist = new ArrayList<ArrayList>();
+    ArrayList list = new ArrayList();
+    ArrayList cipherlist = new ArrayList();
+    String sql = null;
+    sql= "select * from user where "+label1+" "+label2+" "+value+" ;";
+    System.out.println(sql);
+    try{  
+        con = Basedao.getConnection();  
+        Map<String, String> new_query_select = client.RewriteQuery(sql); // 重写语句
+        String new_query = new_query_select.get("0");
+        System.out.println("in UserinfoDao.orderby new_query: " + new_query);
+        psta = con.prepareStatement(new_query);  
+        rs = psta.executeQuery();  // 执行重写后的语句
+        
+        ResultType cipherresult = client.ResultSet2Result(rs);
+        Map<String, String> nameCipherMap = cipherresult.getNameMap(); // 属性字段
+        ResultType plainresult = client.DecryptResult(cipherresult, sql); // 解密结果集
+        Map<String, String> nameMap = plainresult.getNameMap(); // 属性字段
+        
+        // 密文
+        for(int i = 0; i < cipherresult.getValueList().size(); i++) {
+        	Map<String, String> valueRowCipherMap = cipherresult.getValueList().get(i); // 一行数据
+            UserInfo objCipher = new UserInfo();
+            String idCipher = valueRowCipherMap.get(nameCipherMap.get("0"));
+            String nameCipher = valueRowCipherMap.get(nameCipherMap.get("1"));
+            String ageCipher = valueRowCipherMap.get(nameCipherMap.get("2"));
+            String hobbyCipher = valueRowCipherMap.get(nameCipherMap.get("3"));
+            String mtextCipher = valueRowCipherMap.get(nameCipherMap.get("4"));
+            
+            objCipher.set_id(idCipher); 
+            objCipher.setUser_name(nameCipher);  
+            objCipher.setUser_age(ageCipher);  
+            objCipher.setUser_hobby(hobbyCipher);  
+            objCipher.setMtext(mtextCipher);  
+            cipherlist.add(objCipher);  
+        }
+        
+        for(int i = 0; i < plainresult.getValueList().size(); i++) {
+        	Map<String, String> valueRowMap = plainresult.getValueList().get(i); // 一行数据
+            UserInfo obj = new UserInfo();
+            String id = valueRowMap.get(nameMap.get("0"));
+            String name = valueRowMap.get(nameMap.get("1"));
+            String age = valueRowMap.get(nameMap.get("2"));
+            String hobby = valueRowMap.get(nameMap.get("3"));
+            String mtext = valueRowMap.get(nameMap.get("4"));
+            
+            obj.set_id(id); 
+            obj.setUser_name(name);  
+            obj.setUser_age(age);  
+            obj.setUser_hobby(hobby);  
+            obj.setMtext(mtext);  
+            list.add(obj);  
+        }
+        datalist.add(list); // 明文第一
+        datalist.add(cipherlist); // 密文第二
+    }catch(Exception e){  
+        e.printStackTrace();  
+    }finally{  
+        try{  
+            Basedao.close(rs, psta, con);  
+        }catch(Exception e){  
+            e.printStackTrace();  
+        }  
+        return datalist;  
+    }  
+}  
       
 }  
